@@ -1,0 +1,99 @@
+---
+name: "PredictionFC"
+dataIns:
+- name: "input"
+  type: "collection"
+- name: "numberOfThreads"
+  type: "number"
+- name: "numberOfItems"
+  type: "number"
+workflowBody:
+- function:
+    name: "createEC2"
+    type: "Collection"
+- function:
+    name: "splitSymbols"
+    type: "Collection"
+    dataIns:
+    - name: "input"
+      type: "collection"
+      source: "PredictionFC/input"
+    dataOuts:
+    - name: "output"
+      type: "collection"
+- function:
+    name: "workers"
+    type: "Collection"
+    dataIns:
+    - name: "splitSymbolsOutput"
+      type: "collection"
+      source: "splitSymbols/output"
+    - name: "numberOfThreads"
+      type: "number"
+      source: "PredictionFC/numberOfThreads"
+    - name: "numberOfItems"
+      type: "number"
+      source: "PredictionFC/numberOfItems"
+    dataOuts:
+    - name: "splittedSymbols"
+      type: "collection"
+    - name: "numberOfThreads"
+      type: "number"
+    - {}
+- parallelFor:
+    name: "ParallelFor"
+    dataIns:
+    - name: "splittedSymbols"
+      type: "collection"
+      source: "workers/splittedSymbols"
+    - name: "numberOfItems"
+      source: "PredictionFC/numberOfItems"
+    loopCounter:
+      type: "number"
+      to: "PredictionFC/numberOfThreads"
+      step: "1"
+    loopBody:
+    - function:
+        name: "pullData"
+        type: "collection"
+        dataIns:
+        - name: "splittedSymbols"
+          type: "collection"
+          source: "ParallelFor/splittedSymbols"
+        - {}
+        dataOuts:
+        - name: "pulledData"
+          type: "collection"
+        - {}
+    - function:
+        name: "preProcessing"
+        type: "collection"
+        dataIns:
+        - name: "pulledData"
+          type: "collection"
+          source: "pullData/pulledData"
+        - {}
+        dataOuts:
+        - name: "preprocessedData"
+          type: "collection"
+        - {}
+    - function:
+        name: "uploadStockData"
+        type: "Collection"
+        dataIns:
+        - name: "preprocessedData"
+          type: "collection"
+          source: "preProcessing/preprocessedData"
+        - {}
+        dataOuts:
+        - type: "string"
+        - {}
+    - function:
+        name: "forecastData"
+        type: "Collection"
+    - function:
+        name: "pullForcastedData"
+        type: "collection"
+- function:
+    name: "plotData"
+    type: "Collection"

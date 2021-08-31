@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'application'
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    ivy {
+        url "/Schreibtisch/GradleTut/Intrinio-sdk-6.0.0"
+    }
+    mavenLocal()
+
+}
+
+mainClassName = 'HelloWorld'
+dependencies {
+    compile fileTree(dir: 'libs/jar_files', include: '*.jar')
+    compile files('libs/slf4j-simple-1.7.30.jar')
+    compile group: 'com.yahoofinance-api', name: 'YahooFinanceAPI', version: '3.15.0'
+    compile 'com.amazonaws:aws-java-sdk:1.11.520'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.amazonaws:aws-lambda-java-core:1.1.0'
+    implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.327'
+    implementation 'org.apache.commons:commons-lang3:3.4'
+    implementation 'com.amazonaws:aws-java-sdk-s3'
+    implementation 'commons-io:commons-io:2.4'
+    implementation 'org.slf4j:slf4j-simple:1.6.1'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
